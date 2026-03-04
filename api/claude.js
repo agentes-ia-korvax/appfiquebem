@@ -5,9 +5,8 @@ const handler = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada no Vercel' });
 
-  // GET = lista modelos disponíveis
   if (req.method === 'GET') {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
     const d = await r.json();
@@ -19,7 +18,7 @@ const handler = async (req, res) => {
 
   try {
     const { prompt, max_tokens = 1000 } = req.body;
-    const model = 'gemini-2.0-flash';
+    const model = 'gemini-2.0-flash-001';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
@@ -30,9 +29,16 @@ const handler = async (req, res) => {
       }),
     });
     const data = await response.json();
-    if (!response.ok) return res.status(200).json({ error: 'gemini_error', status: response.status, data });
+    if (!response.ok) {
+      const errMsg = data?.error?.message || `HTTP ${response.status}`;
+      return res.status(200).json({ error: errMsg, raw: data });
+    }
+    const finishReason = data.candidates?.[0]?.finishReason;
+    if (finishReason && finishReason !== 'STOP') {
+      return res.status(200).json({ error: `Gemini bloqueou o conteúdo: ${finishReason}`, raw: data });
+    }
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!text) return res.status(200).json({ error: 'empty_response', raw: data });
+    if (!text) return res.status(200).json({ error: 'Resposta vazia. Verifique a GEMINI_API_KEY no Vercel.', raw: data });
     return res.status(200).json({ text });
   } catch (err) {
     return res.status(200).json({ error: err.message });
