@@ -19,7 +19,7 @@ const handler = async (req, res) => {
 
   try {
     const { prompt, max_tokens = 1000 } = req.body;
-    const model = 'gemini-2.0-flash-lite';
+    const model = 'gemini-2.0-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
