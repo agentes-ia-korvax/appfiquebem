@@ -3,14 +3,24 @@ const handler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
 
+  // GET = lista modelos disponíveis
+  if (req.method === 'GET') {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    const d = await r.json();
+    const names = d.models?.map(m => m.name) || d;
+    return res.status(200).json({ models: names });
+  }
+
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
   try {
     const { prompt, max_tokens = 1000 } = req.body;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    const model = 'gemini-2.0-flash-lite';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -20,7 +30,6 @@ const handler = async (req, res) => {
       }),
     });
     const data = await response.json();
-    // Return full response for debugging
     if (!response.ok) return res.status(200).json({ error: 'gemini_error', status: response.status, data });
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if (!text) return res.status(200).json({ error: 'empty_response', raw: data });
