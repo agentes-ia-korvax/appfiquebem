@@ -1,4 +1,4 @@
-const CACHE = 'fiquebem-v3';
+const CACHE = 'fiquebem-v4';
 const ASSETS = ['/', '/index.html', '/icon-192.png', '/icon-512.png', '/manifest.json'];
 
 self.addEventListener('install', e => {
@@ -40,4 +40,3 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
-
