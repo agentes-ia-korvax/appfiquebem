@@ -1,6 +1,6 @@
 {
-  "name": "Fique Bem",
-  "short_name": "FiqueBem",
+  "name": "Hábitos",
+  "short_name": "Hábitos",
   "description": "Seu app de hábitos diários",
   "start_url": "/",
   "display": "standalone",
