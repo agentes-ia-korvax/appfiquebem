@@ -1,4 +1,4 @@
-const CACHE = 'fiquebem-v5';
+const CACHE = 'fiquebem-v6';
 const ASSETS = ['/', '/index.html', '/icon-192.png', '/icon-512.png', '/manifest.json'];
 
 self.addEventListener('install', e => {
